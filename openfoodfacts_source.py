@@ -6,7 +6,7 @@ import datetime as dt,json,os,time,urllib.parse,urllib.request
 from pathlib import Path
 
 BASE="https://world.openfoodfacts.org/api/v2/search"
-CATEGORIES=("en:household-products","en:personal-care-products","en:pet-foods","en:beverages")
+CATEGORIES=("en:beverages","en:snacks","en:breakfast-cereals","en:spreads")
 def extract(payload,observed_at):
     rows=[]
     for p in payload.get("products",[]):
@@ -17,7 +17,7 @@ def extract(payload,observed_at):
         rows.append({"product_family":name,"country":"EU","source_url":"https://world.openfoodfacts.org/product/"+urllib.parse.quote(code,safe=""),"observed_at":observed_at,"evidence_type":"public_product_catalogue","catalogue":"Open Food Facts","barcode":code,"brand":str(p.get("brands") or ""),"categories_tags":p.get("categories_tags") or [],"countries_tags":countries,"sales_verified":False,"demand_verified":False,"price_verified":False,"license":"ODbL","attribution":"Open Food Facts contributors"})
     return rows
 def fetch(category,limit=30):
-    query=urllib.parse.urlencode({"categories_tags":category,"page_size":limit,"fields":"code,product_name,brands,categories_tags,countries_tags","json":1})
+    query=urllib.parse.urlencode({"categories_tags":category,"page_size":limit,"fields":"code,product_name,brands,categories_tags,countries_tags"})
     request=urllib.request.Request(BASE+"?"+query,headers={"User-Agent":os.environ.get("OFF_USER_AGENT","EUOpportunityResearch/0.1 (contact: project GitHub issues)"),"Accept":"application/json"})
     with urllib.request.urlopen(request,timeout=25) as response:return json.load(response)
 def main():
