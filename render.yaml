@@ -1,0 +1,10 @@
+# Proposal only: applying creates NEW billable services. No DalamanWay references.
+services:
+  - type: cron
+    name: eu-product-research-cron
+    runtime: python
+    region: frankfurt
+    plan: starter
+    schedule: '*/15 * * * *'
+    buildCommand: pip install -r requirements.txt
+    startCommand: python engine.py run
