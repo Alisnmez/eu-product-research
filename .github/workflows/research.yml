@@ -47,6 +47,18 @@ jobs:
         run: python opportunity_pipeline.py
       - name: Publish operational health report
         run: python research_health.py
+      - name: Upload research diagnostics even if a prior step fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-diagnostics
+          path: |
+            data/openfoodfacts_status.json
+            data/HEALTH.md
+            data/CHECKPOINT.md
+            data/evidence_rejections.json
+          if-no-files-found: warn
+          retention-days: 7
       - name: Persist evidence checkpoint
         run: |
           git config user.name "research-bot"
