@@ -6,6 +6,7 @@ on:
       - 'discovery.py'
       - 'review_analysis.py'
       - 'evaluation.py'
+      - 'quality_gate.py'
       - 'tests/**'
       - '.github/workflows/research.yml'
   schedule:
@@ -29,6 +30,8 @@ jobs:
           python-version: '3.12'
       - name: Unit tests
         run: python -m unittest discover -s tests -v
+      - name: Audit existing product evidence
+        run: python quality_gate.py
       - name: Research customer problems
         run: python discovery.py
       - name: Persist evidence checkpoint
