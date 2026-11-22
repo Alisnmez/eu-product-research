@@ -7,6 +7,7 @@ on:
       - 'review_analysis.py'
       - 'evaluation.py'
       - 'quality_gate.py'
+      - 'criteria.py'
       - 'tests/**'
       - '.github/workflows/research.yml'
   schedule:
