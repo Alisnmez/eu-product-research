@@ -1,5 +1,13 @@
 name: EU opportunity discovery
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'discovery.py'
+      - 'review_analysis.py'
+      - 'evaluation.py'
+      - 'tests/**'
+      - '.github/workflows/research.yml'
   schedule:
     - cron: '7,37 * * * *'
   workflow_dispatch:
@@ -19,6 +27,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
       - name: Research customer problems
         run: python discovery.py
       - name: Persist evidence checkpoint
