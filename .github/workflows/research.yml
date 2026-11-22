@@ -9,6 +9,7 @@ on:
       - 'quality_gate.py'
       - 'criteria.py'
       - 'opportunity_pipeline.py'
+      - 'research_health.py'
       - 'tests/**'
       - '.github/workflows/research.yml'
   schedule:
@@ -38,6 +39,8 @@ jobs:
         run: python discovery.py
       - name: Build evidence-based opportunity queue
         run: python opportunity_pipeline.py
+      - name: Publish operational health report
+        run: python research_health.py
       - name: Persist evidence checkpoint
         run: |
           git config user.name "research-bot"
