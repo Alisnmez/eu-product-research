@@ -31,7 +31,7 @@ class Check:
 def assess(checks,hard_veto=None):
     hard_veto=hard_veto or {}
     veto=[k for k in ("unsafe_or_illegal","negative_contribution","unverifiable_supplier") if hard_veto.get(k) is True]
-    score=0.;unknown=[];failed=[]
+    score=0.;unknown=[];failed=[];verified=[]
     for group,names in GROUPS.items():
         positives=0
         for name in names:
@@ -41,7 +41,8 @@ def assess(checks,hard_veto=None):
             else:r=raw if isinstance(raw,dict) else {}
             if r.get("status")=="met" and r.get("source_url","").startswith("https://") and r.get("observed_at"):
                 positives+=1
+                verified.append(key)
             elif r.get("status")=="not_met":failed.append(key)
             else:unknown.append(key)
         score+=WEIGHTS[group]*positives/len(names)
-    return {"status":"rejected" if veto else ("pending" if unknown else "assessed"),"score":0 if veto else round(score,2),"veto":veto,"unknown":unknown,"not_met":failed,"criteria_total":60,"criteria_verified":60-len(unknown)-len(failed)}
+    return {"status":"rejected" if veto else ("pending" if unknown else "assessed"),"score":0 if veto else round(score,2),"veto":veto,"unknown":unknown,"not_met":failed,"criteria_total":60,"criteria_verified":len(verified),"criteria_failed":len(failed),"criteria_unknown":len(unknown),"eligible_for_winner":not veto and not unknown and not failed and len(verified)==60}
