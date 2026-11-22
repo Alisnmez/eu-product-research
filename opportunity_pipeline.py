@@ -1,14 +1,13 @@
 """Turn permissioned product/review evidence into auditable research queues.
 This is a triage pipeline, NOT a sales forecast.
 """
-import argparse,csv,hashlib,json,re
-from collections import defaultdict
+import argparse,json,re,unicodedata
 from pathlib import Path
 from urllib.parse import urlsplit
 from criteria import assess
 
 def normalize(value):
-    return re.sub(r"[^a-z0-9]+"," ",str(value).casefold()).strip()
+    return re.sub(r"[^\\w]+"," ",unicodedata.normalize("NFKC",str(value)).casefold(),flags=re.UNICODE).strip()
 def valid_https(url):
     u=urlsplit(str(url))
     return u.scheme=="https" and bool(u.netloc)
@@ -22,7 +21,12 @@ def read_jsonl(path):
                 if isinstance(value,dict):out.append(value)
             except json.JSONDecodeError:pass
     return out
-def process(products,reviews):
+def process(products,reviews,assessments=None):
+    assessments=assessments or []
+    assessment_map={}
+    for record in assessments:
+        key=(normalize(record.get("product_family","")),str(record.get("country","")).upper())
+        if key[0] and key[1]:assessment_map[key]=record
     families={}
     errors=[]
     for i,p in enumerate(products):
@@ -60,7 +64,8 @@ def process(products,reviews):
         entry["reviews"]=[]
         # Do not promote review volume or listing presence to confirmed demand.
         entry["research_stage"]="review_evidence_present" if entry["distinct_review_count"] else "listing_evidence_only"
-        entry["criteria"]=assess({})
+        a=assessment_map.get((normalize(entry["product_family"]),entry["country"]),{})
+        entry["criteria"]=assess(a.get("checks",{}),a.get("hard_veto",{}))
         output.append(entry)
     output.sort(key=lambda e:(-e["distinct_review_count"],-e["independent_listing_domains"],e["product_family"]))
     return {"candidates":output,"errors":errors,"unique_product_country_pairs":len(output),"demand_verified":0,"sales_verified":0}
@@ -69,8 +74,9 @@ def main():
     parser.add_argument("--products",default="data/product_candidates.jsonl")
     parser.add_argument("--reviews",default="data/reviews_import.jsonl")
     parser.add_argument("--output",default="data/opportunity_queue.json")
+    parser.add_argument("--assessments",default="data/assessments.jsonl")
     a=parser.parse_args()
-    result=process(read_jsonl(a.products),read_jsonl(a.reviews))
+    result=process(read_jsonl(a.products),read_jsonl(a.reviews),read_jsonl(a.assessments))
     target=Path(a.output);target.parent.mkdir(parents=True,exist_ok=True)
     target.write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({"candidates":len(result["candidates"]),"errors":len(result["errors"]),"verified_sales":0}))
