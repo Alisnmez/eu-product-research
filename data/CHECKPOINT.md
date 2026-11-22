@@ -1,14 +1,14 @@
 # EU Research Checkpoint
 
-Last run: 2026-11-22T22:45:28.407506+00:00
+Last run: 2026-11-22T22:46:00.346882+00:00
 
-Runs: 5
+Runs: 6
 
-Unique unreviewed problem signals: 235
+Unique unreviewed problem signals: 258
 
 Verified product families: **0** (this pipeline does not validate products).
 
-Last new signals: 57
+Last new signals: 23
 
 Errors: []
 
